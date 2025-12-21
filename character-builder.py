@@ -1,11 +1,72 @@
+import pathlib
 import glob
 import os
+import uuid
 import streamlit as st
 import polars as pl
 from dotenv import load_dotenv
 import frontmatter
 import jinja2 as j2
 from jinja2 import Environment
+
+def compose_prompt(vault_path: str, sources:dict, output:str) -> str:
+    print(vault_path)
+
+    character = sources.get('character', {})
+    clothes = sources.get('clothes', [])
+    modifiers = sources.get('modifiers', [])
+    stages = sources.get('stages', [])
+    styles = sources.get('styles', []) 
+
+    scene = ""
+
+    scene += "# Character\n"
+    character_path = pathlib.Path(character.get('path', '')).relative_to(vault_path).as_posix()
+    scene += f"- [{character.get('name', '')}](<{character_path}>)\n"
+    scene += "\n# Clothing\n"
+    for cloth in clothes:
+        cloth_absolute_path = cloth.get('path', '')
+        if cloth_absolute_path:
+            cloth_path = pathlib.Path(cloth_absolute_path).relative_to(vault_path).as_posix()
+            scene += f"- [{cloth.get('name', '')}](<{cloth_path}>)\n"
+
+    scene += "\n# Modifiers\n"    
+    for modifier in modifiers:
+        modifier_absolute_path = modifier.get('path', '')
+        if modifier_absolute_path:
+            modifier_path = pathlib.Path(modifier_absolute_path).relative_to(vault_path).as_posix()
+            scene += f"- [{modifier.get('name', '')}](<{modifier_path}>)\n"
+
+    scene += "\n# Stage\n"
+    for stage in stages:
+        stage_absolute_path = stage.get('path', '')
+        if stage_absolute_path:
+            stage_path = pathlib.Path(stage_absolute_path).relative_to(vault_path).as_posix()
+            scene += f"- [{stage.get('name', '')}](<{stage_path}>)\n"
+
+    scene += "\n# Style\n"
+    for style in styles:
+        style_absolute_path = style.get('path', '')
+        if style_absolute_path:
+            style_path = pathlib.Path(style_absolute_path).relative_to(vault_path).as_posix()
+            scene += f"- [{style.get('name', '')}](<{style_path}>)\n"
+    
+    scene += "\n# Generated Prompt\n"
+    scene += output + "\n"
+    
+    post = frontmatter.Post(scene)
+    post.metadata = {
+        "title": f"Scene - {character.get('name', '')}",
+        "Character": character.get('name', ''),
+        "Clothing": [cloth.get('name', '') for cloth in clothes],
+        "Modifiers": [modifier.get('name', '') for modifier in modifiers],
+        "Stage": [stage.get('name', '') for stage in stages],
+        "Style": [style.get('name', '') for style in styles],
+    }
+
+    return frontmatter.dumps(post)
+   
+
 
 def load_characters(vault_path: str, characters_dir:str):
     characters_path = os.path.join(vault_path, characters_dir)
@@ -16,6 +77,7 @@ def load_characters(vault_path: str, characters_dir:str):
             post = frontmatter.load(f)
             character_name = os.path.basename(filepath).replace('.md', '')
             character = {}
+            character['path'] = filepath
             character['name'] = character_name
             character['series'] = post.metadata.get('Series', 'Unknown')
             character['subtype'] = post.metadata.get('Subtype', '')
@@ -36,6 +98,7 @@ def load_clothes(vault_path: str, clothes_dir:str):
             post = frontmatter.load(f)
             cloth_name = os.path.basename(filepath).replace('.md', '')
             cloth = {}
+            cloth['path'] = filepath
             cloth['name'] = cloth_name
             cloth['tags'] = post.metadata.get('tags', [])
             base_model = post.metadata.get('Model', 'unknown')
@@ -62,6 +125,7 @@ def load_modifiers(vault_path: str, modifiers_dir:str):
             post = frontmatter.load(f)
             modifier_name = os.path.basename(filepath).replace('.md', '')
             modifier = {}
+            modifier['path'] = filepath
             modifier['name'] = modifier_name
             modifier['tags'] = post.metadata.get('tags', [])
             base_model = post.metadata.get('Model', 'unknown')
@@ -88,6 +152,7 @@ def load_stages(vault_path: str, stage_dir:str):
             post = frontmatter.load(f)
             stage_name = os.path.basename(filepath).replace('.md', '')
             stage = {}
+            stage['path'] = filepath
             stage['name'] = stage_name
             stage['tags'] = post.metadata.get('tags', [])
             base_model = post.metadata.get('Model', 'unknown')
@@ -114,6 +179,7 @@ def load_styles(vault_path: str, style_dir:str):
             post = frontmatter.load(f)
             style_name = os.path.basename(filepath).replace('.md', '')
             style = {}
+            style['path'] = filepath
             style['name'] = style_name
             style['tags'] = post.metadata.get('tags', [])
             base_model = post.metadata.get('Model', 'unknown')
@@ -157,12 +223,13 @@ def main():
 
     vault_path = os.getenv("VAULT_PATH")
     characters_dir = os.getenv("CHARACTERS_DIR", "Characters")
+    exports_dir = os.getenv("EXPORTS_DIR", "Scenes")
 
     characters = load_characters(vault_path, characters_dir)
     clothes = load_clothes(vault_path, os.getenv("CLOTHES_DIR", "Clothing"))
     modifiers = load_modifiers(vault_path, os.getenv("MODIFIERS_DIR", "Modification"))
     stages = load_stages(vault_path, os.getenv("STAGE_DIR", "Stage"))
-    styles = load_styles(vault_path, os.getenv("STAGE_DIR", "Styles"))
+    styles = load_styles(vault_path, os.getenv("STYLE_DIR", "Styles"))
 
     serieses = characters['series'].unique().sort().to_list()
 
@@ -170,6 +237,9 @@ def main():
     selected_series = st.sidebar.selectbox("Select Series", options=serieses)
     filtered_characters = characters.filter(pl.col('series') == selected_series)['name'].sort().to_list()
     selected_character = st.sidebar.selectbox("Select Character", options=filtered_characters)
+
+    sources = {}
+    sources['character'] = characters.filter(pl.col('name') == selected_character).to_dicts()[0]
     subtype = characters.filter(pl.col('name') == selected_character)['subtype'][0]
     prompts = characters.filter(pl.col('name') == selected_character)['prompts'][0]
     selected_prompt_key = st.sidebar.selectbox("Select Prompt", options=list(prompts.keys()))
@@ -216,8 +286,10 @@ def main():
         selected_clothes_values.append(val)
     
     clothing = []
+    sources['clothes'] = []
     for selected_cloth in selected_clothes_values:
         selected_cloth_data = fitted_clothes.filter(pl.col('name') == selected_cloth).to_dicts()[0]
+        sources['clothes'].append(selected_cloth_data)
         clothing.append({
             "lora": selected_cloth_data.get("lora", ""),
             "positive": selected_cloth_data.get("positive", ""),
@@ -231,6 +303,7 @@ def main():
         if st.button("削除", key="btn_del_modifiers") and st.session_state.modifiers_count > 1:
             st.session_state.modifiers_count -= 1
 
+    sources['modifiers'] = []
     selected_modifiers_values = []
     for i in range(st.session_state.modifiers_count):
         val = st.selectbox(
@@ -243,6 +316,7 @@ def main():
     mods = []
     for selected_modifier in selected_modifiers_values:
         selected_modifier_data = fitted_modifiers.filter(pl.col('name') == selected_modifier).to_dicts()[0]
+        sources['modifiers'].append(selected_modifier_data)
         mods.append({
             "lora": selected_modifier_data.get("lora", ""),
             "positive": selected_modifier_data.get("positive", ""),
@@ -265,9 +339,11 @@ def main():
         )
         selected_stages_values.append(val)
     
+    sources['stages'] = []
     stg = []
     for selected_stage in selected_stages_values:
         selected_stage_data = fitted_stages.filter(pl.col('name') == selected_stage).to_dicts()[0]
+        sources['stages'].append(selected_stage_data)
         stg.append({
             "lora": selected_stage_data.get("lora", ""),
             "positive": selected_stage_data.get("positive", ""),
@@ -290,9 +366,11 @@ def main():
         )
         selected_styles_values.append(val)
     
+    sources['styles'] = []
     sty = []
     for selected_style in selected_styles_values:
         selected_style_data = fitted_styles.filter(pl.col('name') == selected_style).to_dicts()[0]
+        sources['styles'].append(selected_style_data)
         sty.append({
             "lora": selected_style_data.get("lora", ""),
             "positive": selected_style_data.get("positive", ""),
@@ -308,11 +386,20 @@ def main():
         "clothes": clothing,
     }
 
+    print(sources)
     rendered_prompt = temlpate.render(data)
     clean_output = "".join(rendered_prompt.splitlines()).strip()
 
     st.subheader("Generated Prompt")
     st.text_area("Prompt", value=clean_output, height=400)
+
+    composed_matter = compose_prompt(vault_path, sources, clean_output)
+
+    export_path = os.path.join(vault_path, exports_dir)
+    notename = f"Scene - {selected_character} - {str(uuid.uuid4())[:8]}.md"
+    full_export_path = os.path.join(export_path, notename)
+
+    st.button("Export Prompt", on_click=lambda: open(full_export_path, 'w', encoding='utf-8').write(composed_matter))
 
 if __name__ == "__main__":
     main()
