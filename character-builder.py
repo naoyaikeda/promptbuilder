@@ -209,7 +209,7 @@ def main():
     selected_clothes_values = []
     for i in range(st.session_state.clothes_count):
         val = st.selectbox(
-            f"選択項目 {i+1}",
+            f"衣装項目 {i+1}",
             options=fitted_clothes['name'].to_list(),
             key=f"sb_clothes_{i}" # 重要: keyをユニークにする
         )
@@ -234,7 +234,7 @@ def main():
     selected_modifiers_values = []
     for i in range(st.session_state.modifiers_count):
         val = st.selectbox(
-            f"選択項目 {i+1}",
+            f"モディファイア項目 {i+1}",
             options=fitted_modifiers['name'].to_list(),
             key=f"sb_modifiers_{i}" # keyをより具体的に
         )
@@ -259,7 +259,7 @@ def main():
     selected_stages_values = []
     for i in range(st.session_state.stages_count):
         val = st.selectbox(
-            f"選択項目 {i+1}",
+            f"ステージ項目 {i+1}",
             options=fitted_stages['name'].to_list(),
             key=f"sb_stages_{i}" # keyをより具体的に
         )
@@ -284,7 +284,7 @@ def main():
     selected_styles_values = []
     for i in range(st.session_state.styles_count):
         val = st.selectbox(
-            f"選択項目 {i+1}",
+            f"スタイル項目 {i+1}",
             options=fitted_styles['name'].to_list(),
             key=f"sb_styles_{i}" # keyをより具体的に
         )
