@@ -1,0 +1,13 @@
+[project]
+name = "promptbuilder"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2>=3.1.6",
+    "polars>=1.36.1",
+    "python-dotenv>=1.2.1",
+    "python-frontmatter>=1.1.0",
+    "streamlit>=1.52.2",
+]
