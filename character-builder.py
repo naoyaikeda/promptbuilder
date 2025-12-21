@@ -112,10 +112,7 @@ def main():
 
     serieses = characters['series'].unique().sort().to_list()
 
-    st.title("Character Prompt Builder")
-
-    st.set_page_config(page_title="Prompt Builder", layout="wide")
-    st.title("Prompt Builder")
+    st.set_page_config(page_title="Character Prompt Builder", layout="wide")
     selected_series = st.sidebar.selectbox("Select Series", options=serieses)
     filtered_characters = characters.filter(pl.col('series') == selected_series)['name'].sort().to_list()
     selected_character = st.sidebar.selectbox("Select Character", options=filtered_characters)
