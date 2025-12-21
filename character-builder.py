@@ -18,6 +18,7 @@ def load_characters(vault_path: str, characters_dir:str):
             character = {}
             character['name'] = character_name
             character['series'] = post.metadata.get('Series', 'Unknown')
+            character['subtype'] = post.metadata.get('Subtype', '')
             character['tags'] = post.metadata.get('tags', [])
             character['prompts'] = post.metadata.get('prompts', {})
             characters.append(character)
@@ -52,6 +53,32 @@ def load_clothes(vault_path: str, clothes_dir:str):
 
     return df_clothes
 
+def load_modifiers(vault_path: str, modifiers_dir:str):
+    modifiers_path = os.path.join(vault_path, modifiers_dir)
+
+    modifiers = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
+    for filepath in glob.glob(os.path.join(modifiers_path, "*.md"), recursive=True):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            post = frontmatter.load(f)
+            modifier_name = os.path.basename(filepath).replace('.md', '')
+            modifier = {}
+            modifier['name'] = modifier_name
+            modifier['tags'] = post.metadata.get('tags', [])
+            base_model = post.metadata.get('Model', 'unknown')
+
+            try:
+                modifier['base_model'] = base_model.lower()
+            except Exception:
+                modifier['base_model'] = 'unknown'            
+
+            modifier['positive'] = post.metadata.get('Base', '')
+            modifier['lora'] = post.metadata.get('LoRA', '')
+            modifiers.append(modifier)
+    
+    df_modifiers = pl.DataFrame(modifiers)
+
+    return df_modifiers
+
 def load_templates():
     templates = {}
 
@@ -81,6 +108,7 @@ def main():
 
     characters = load_characters(vault_path, characters_dir)
     clothes = load_clothes(vault_path, os.getenv("CLOTHES_DIR", "Clothing"))
+    modifiers = load_modifiers(vault_path, os.getenv("MODIFIERS_DIR", "Modification"))
 
     serieses = characters['series'].unique().sort().to_list()
 
@@ -91,14 +119,19 @@ def main():
     selected_series = st.sidebar.selectbox("Select Series", options=serieses)
     filtered_characters = characters.filter(pl.col('series') == selected_series)['name'].sort().to_list()
     selected_character = st.sidebar.selectbox("Select Character", options=filtered_characters)
+    subtype = characters.filter(pl.col('name') == selected_character)['subtype'][0]
     prompts = characters.filter(pl.col('name') == selected_character)['prompts'][0]
     selected_prompt_key = st.sidebar.selectbox("Select Prompt", options=list(prompts.keys()))
+
+    prompt = prompts[selected_prompt_key]
+    base_model = prompt.get("base_model", "unknown")
+
+    fitted_modifiers = modifiers.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
+    selected_modifier = st.sidebar.selectbox("Select Modifier", options=fitted_modifiers['name'].to_list())
     selected_template_name = st.sidebar.selectbox("Select Template", options=list(templates.keys()))
 
     temlpate = env.from_string(templates[selected_template_name])
 
-    prompt = prompts[selected_prompt_key]
-    base_model = prompt.get("base_model", "unknown")
     fitted_clothes = clothes.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
 
     if "clothes_count" not in st.session_state:
@@ -129,16 +162,20 @@ def main():
             "positive": selected_cloth_data.get("positive", ""),
         })
     
+    modifier = fitted_modifiers.filter(pl.col('name') == selected_modifier).to_dicts()[0]
     data = {
+        "subtype": subtype,
+        "modifier": modifier,
         "lora": prompt.get("lora", ""),
         "positive": prompt.get("positive", ""),
         "clothes": clothing,
     }
 
     rendered_prompt = temlpate.render(data)
+    clean_output = "".join(rendered_prompt.splitlines()).strip()
 
     st.subheader("Generated Prompt")
-    st.text_area("Prompt", value=rendered_prompt, height=400)
+    st.text_area("Prompt", value=clean_output, height=400)
 
 if __name__ == "__main__":
     main()

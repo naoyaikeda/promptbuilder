@@ -1,3 +1,4 @@
+1 {{ subtype | lower}}, solo
 (<lora:{{ lora }}>, {{ positive }}), 
 {% for cloth in clothes %}
 {% if cloth.lora %}
@@ -7,3 +8,9 @@
 {{ cloth.positive }},
 {% endif %}
 {% endfor %}
+{% if modifier.lora %}
+<lora:{{ modifier.lora }}>,
+{% endif %}
+{% if modifier.positive %}
+{{ modifier.positive }}
+{% endif %}
