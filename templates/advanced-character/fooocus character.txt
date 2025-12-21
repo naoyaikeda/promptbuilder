@@ -12,5 +12,13 @@
 <lora:{{ modifier.lora }}>,
 {% endif %}
 {% if modifier.positive %}
-{{ modifier.positive }}
+{{ modifier.positive }},
 {% endif %}
+{% for stage in stages %}
+{% if stage.lora %}
+<lora:{{ stage.lora }}>, 
+{% endif %}
+{% if stage.positive %}
+{{ stage.positive }},
+{% endif %}
+{% endfor %}

@@ -79,6 +79,32 @@ def load_modifiers(vault_path: str, modifiers_dir:str):
 
     return df_modifiers
 
+def load_stages(vault_path: str, stage_dir:str):
+    stages_path = os.path.join(vault_path, stage_dir)
+
+    stages = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
+    for filepath in glob.glob(os.path.join(stages_path, "*.md"), recursive=True):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            post = frontmatter.load(f)
+            stage_name = os.path.basename(filepath).replace('.md', '')
+            stage = {}
+            stage['name'] = stage_name
+            stage['tags'] = post.metadata.get('tags', [])
+            base_model = post.metadata.get('Model', 'unknown')
+
+            try:
+                stage['base_model'] = base_model.lower()
+            except Exception:
+                stage['base_model'] = 'unknown'            
+
+            stage['positive'] = post.metadata.get('Base', '')
+            stage['lora'] = post.metadata.get('LoRA', '')
+            stages.append(stage)
+    
+    df_stages = pl.DataFrame(stages)
+
+    return df_stages
+
 def load_templates():
     templates = {}
 
@@ -109,6 +135,7 @@ def main():
     characters = load_characters(vault_path, characters_dir)
     clothes = load_clothes(vault_path, os.getenv("CLOTHES_DIR", "Clothing"))
     modifiers = load_modifiers(vault_path, os.getenv("MODIFIERS_DIR", "Modification"))
+    stages = load_stages(vault_path, os.getenv("STAGE_DIR", "Stage"))
 
     serieses = characters['series'].unique().sort().to_list()
 
@@ -130,16 +157,20 @@ def main():
     temlpate = env.from_string(templates[selected_template_name])
 
     fitted_clothes = clothes.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
+    fitted_stages = stages.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
 
     if "clothes_count" not in st.session_state:
         st.session_state.clothes_count = 1
+    
+    if "stages_count" not in st.session_state:
+        st.session_state.stages_count = 1
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("追加"):
+        if st.button("追加", key="btn_add_clothes"):
             st.session_state.clothes_count += 1
     with col2:
-        if st.button("削除") and st.session_state.options_count > 1:
+        if st.button("削除", key="btn_del_clothes") and st.session_state.clothes_count > 1:
             st.session_state.clothes_count -= 1
 
     selected_clothes_values = []
@@ -147,7 +178,7 @@ def main():
         val = st.selectbox(
             f"選択項目 {i+1}",
             options=fitted_clothes['name'].to_list(),
-            key=f"selectbox_{i}" # 重要: keyをユニークにする
+            key=f"sb_clothes_{i}" # 重要: keyをユニークにする
         )
         selected_clothes_values.append(val)
     
@@ -158,9 +189,35 @@ def main():
             "lora": selected_cloth_data.get("lora", ""),
             "positive": selected_cloth_data.get("positive", ""),
         })
+
+    scol1, scol2 = st.columns(2)
+    with scol1:
+        if st.button("追加", key="btn_add_stages"):
+            st.session_state.stages_count += 1
+    with scol2:
+        if st.button("削除", key="btn_del_stages") and st.session_state.options_count > 1:
+            st.session_state.stages_count -= 1
+
+    selected_stages_values = []
+    for i in range(st.session_state.stages_count):
+        val = st.selectbox(
+            f"選択項目 {i+1}",
+            options=fitted_stages['name'].to_list(),
+            key=f"sb_stages_{i}" # keyをより具体的に
+        )
+        selected_stages_values.append(val)
     
+    stg = []
+    for selected_stage in selected_stages_values:
+        selected_stage_data = fitted_stages.filter(pl.col('name') == selected_stage).to_dicts()[0]
+        stg.append({
+            "lora": selected_stage_data.get("lora", ""),
+            "positive": selected_stage_data.get("positive", ""),
+        })
+
     modifier = fitted_modifiers.filter(pl.col('name') == selected_modifier).to_dicts()[0]
     data = {
+        "stages": stg,
         "subtype": subtype,
         "modifier": modifier,
         "lora": prompt.get("lora", ""),
