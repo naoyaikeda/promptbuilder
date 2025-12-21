@@ -105,6 +105,32 @@ def load_stages(vault_path: str, stage_dir:str):
 
     return df_stages
 
+def load_styles(vault_path: str, style_dir:str):
+    style_path = os.path.join(vault_path, style_dir)
+
+    styles = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
+    for filepath in glob.glob(os.path.join(style_path, "*.md"), recursive=True):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            post = frontmatter.load(f)
+            style_name = os.path.basename(filepath).replace('.md', '')
+            style = {}
+            style['name'] = style_name
+            style['tags'] = post.metadata.get('tags', [])
+            base_model = post.metadata.get('Model', 'unknown')
+
+            try:
+                style['base_model'] = base_model.lower()
+            except Exception:
+                style['base_model'] = 'unknown'            
+
+            style['positive'] = post.metadata.get('Base', '')
+            style['lora'] = post.metadata.get('LoRA', '')
+            styles.append(style)
+    
+    df_styles = pl.DataFrame(styles)
+
+    return df_styles
+
 def load_templates():
     templates = {}
 
@@ -136,6 +162,7 @@ def main():
     clothes = load_clothes(vault_path, os.getenv("CLOTHES_DIR", "Clothing"))
     modifiers = load_modifiers(vault_path, os.getenv("MODIFIERS_DIR", "Modification"))
     stages = load_stages(vault_path, os.getenv("STAGE_DIR", "Stage"))
+    styles = load_styles(vault_path, os.getenv("STAGE_DIR", "Styles"))
 
     serieses = characters['series'].unique().sort().to_list()
 
@@ -151,19 +178,25 @@ def main():
     base_model = prompt.get("base_model", "unknown")
 
     fitted_modifiers = modifiers.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
-    selected_modifier = st.sidebar.selectbox("Select Modifier", options=fitted_modifiers['name'].to_list())
     selected_template_name = st.sidebar.selectbox("Select Template", options=list(templates.keys()))
 
     temlpate = env.from_string(templates[selected_template_name])
 
     fitted_clothes = clothes.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
     fitted_stages = stages.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
+    fitted_styles = styles.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
 
     if "clothes_count" not in st.session_state:
         st.session_state.clothes_count = 1
     
     if "stages_count" not in st.session_state:
         st.session_state.stages_count = 1
+
+    if "modifiers_count" not in st.session_state:
+        st.session_state.modifiers_count = 1
+
+    if "styles_count" not in st.session_state:
+        st.session_state.styles_count = 1
 
     col1, col2 = st.columns(2)
     with col1:
@@ -190,12 +223,37 @@ def main():
             "positive": selected_cloth_data.get("positive", ""),
         })
 
+    mcol1, mcol2 = st.columns(2)
+    with mcol1:
+        if st.button("追加", key="btn_add_modifiers"):
+            st.session_state.modifiers_count += 1
+    with mcol2:
+        if st.button("削除", key="btn_del_modifiers") and st.session_state.modifiers_count > 1:
+            st.session_state.modifiers_count -= 1
+
+    selected_modifiers_values = []
+    for i in range(st.session_state.modifiers_count):
+        val = st.selectbox(
+            f"選択項目 {i+1}",
+            options=fitted_modifiers['name'].to_list(),
+            key=f"sb_modifiers_{i}" # keyをより具体的に
+        )
+        selected_modifiers_values.append(val)
+    
+    mods = []
+    for selected_modifier in selected_modifiers_values:
+        selected_modifier_data = fitted_modifiers.filter(pl.col('name') == selected_modifier).to_dicts()[0]
+        mods.append({
+            "lora": selected_modifier_data.get("lora", ""),
+            "positive": selected_modifier_data.get("positive", ""),
+        })
+
     scol1, scol2 = st.columns(2)
     with scol1:
         if st.button("追加", key="btn_add_stages"):
             st.session_state.stages_count += 1
     with scol2:
-        if st.button("削除", key="btn_del_stages") and st.session_state.options_count > 1:
+        if st.button("削除", key="btn_del_stages") and st.session_state.stages_count > 1:
             st.session_state.stages_count -= 1
 
     selected_stages_values = []
@@ -215,11 +273,36 @@ def main():
             "positive": selected_stage_data.get("positive", ""),
         })
 
-    modifier = fitted_modifiers.filter(pl.col('name') == selected_modifier).to_dicts()[0]
+    ycol1, ycol2 = st.columns(2)
+    with ycol1:
+        if st.button("追加", key="btn_add_styles"):
+            st.session_state.styles_count += 1
+    with ycol2:
+        if st.button("削除", key="btn_del_styles") and st.session_state.styles_count > 1:
+            st.session_state.styles_count -= 1
+
+    selected_styles_values = []
+    for i in range(st.session_state.styles_count):
+        val = st.selectbox(
+            f"選択項目 {i+1}",
+            options=fitted_styles['name'].to_list(),
+            key=f"sb_styles_{i}" # keyをより具体的に
+        )
+        selected_styles_values.append(val)
+    
+    sty = []
+    for selected_style in selected_styles_values:
+        selected_style_data = fitted_styles.filter(pl.col('name') == selected_style).to_dicts()[0]
+        sty.append({
+            "lora": selected_style_data.get("lora", ""),
+            "positive": selected_style_data.get("positive", ""),
+        })
+
     data = {
+        "styles": sty,
         "stages": stg,
         "subtype": subtype,
-        "modifier": modifier,
+        "mods": mods,
         "lora": prompt.get("lora", ""),
         "positive": prompt.get("positive", ""),
         "clothes": clothing,

@@ -8,17 +8,27 @@
 {{ cloth.positive }},
 {% endif %}
 {% endfor %}
-{% if modifier.lora %}
-<lora:{{ modifier.lora }}>,
+{% for mod in mods %}
+{% if mod.lora %}
+<lora:{{ mod.lora }}>, 
 {% endif %}
-{% if modifier.positive %}
-{{ modifier.positive }},
+{% if mod.positive %}
+{{ mod.positive }},
 {% endif %}
+{% endfor %}
 {% for stage in stages %}
 {% if stage.lora %}
 <lora:{{ stage.lora }}>, 
 {% endif %}
 {% if stage.positive %}
 {{ stage.positive }},
+{% endif %}
+{% endfor %}
+{% for style in styles %}
+{% if style.lora %}
+<lora:{{ style.lora }}>, 
+{% endif %}
+{% if style.positive %}
+{{ style.positive }},
 {% endif %}
 {% endfor %}
