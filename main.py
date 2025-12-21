@@ -2,7 +2,7 @@ import streamlit as st
 
 pages = {
     "Builder": [
-        st.Page("character.py", title="Character Prompt Builder", icon="🧙‍♂️"),
+        st.Page("character-builder.py", title="Character Prompt Builder", icon="🧙‍♂️"),
     ]
 }
 

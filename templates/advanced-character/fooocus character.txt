@@ -1,0 +1,9 @@
+(<lora:{{ lora }}>, {{ positive }}), 
+{% for cloth in clothes %}
+{% if cloth.lora %}
+<lora:{{ cloth.lora }}>, 
+{% endif %}
+{% if cloth.positive %}
+{{ cloth.positive }},
+{% endif %}
+{% endfor %}
