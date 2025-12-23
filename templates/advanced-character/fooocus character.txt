@@ -1,5 +1,9 @@
-1 {{ subtype | lower}}, solo
+1 {{ subtype | lower}}, solo, 
+{% if lora %}
 (<lora:{{ lora }}>, {{ positive }}), 
+{% else %}
+({{ positive }}), 
+{% endif %}
 {% for cloth in clothes %}
 {% if cloth.lora %}
 <lora:{{ cloth.lora }}>, 

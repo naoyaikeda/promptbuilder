@@ -62,6 +62,7 @@ def compose_prompt(vault_path: str, sources:dict, output:str) -> str:
         "Modifiers": [modifier.get('name', '') for modifier in modifiers],
         "Stage": [stage.get('name', '') for stage in stages],
         "Style": [style.get('name', '') for style in styles],
+        "tags": ["generated", "Scenes"],
     }
 
     return frontmatter.dumps(post)
