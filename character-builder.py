@@ -148,7 +148,7 @@ def load_stages(vault_path: str, stage_dir:str):
     stages_path = os.path.join(vault_path, stage_dir)
 
     stages = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(stages_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(stages_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             stage_name = os.path.basename(filepath).replace('.md', '')
