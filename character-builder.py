@@ -331,11 +331,22 @@ def main():
         if st.button("削除", key="btn_del_stages") and st.session_state.stages_count > 1:
             st.session_state.stages_count -= 1
 
+    stage_tags = fitted_stages.select(pl.col("tags").explode().unique().drop_nulls().sort())['tags'].to_list()
+    selected_stage_tags = st.multiselect("ステージタグ", options=stage_tags)
+
+    if selected_stage_tags:
+        filtered_fitted_stages = fitted_stages.filter(
+            (pl.col('name') == 'empty') |
+            (pl.col('tags').list.set_intersection(selected_stage_tags).list.len() > 0)
+        )
+    else:
+        filtered_fitted_stages = fitted_stages
+
     selected_stages_values = []
     for i in range(st.session_state.stages_count):
         val = st.selectbox(
             f"ステージ項目 {i+1}",
-            options=fitted_stages['name'].to_list(),
+            options=filtered_fitted_stages['name'].to_list(),
             key=f"sb_stages_{i}" # keyをより具体的に
         )
         selected_stages_values.append(val)
