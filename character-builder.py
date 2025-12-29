@@ -94,7 +94,7 @@ def load_clothes(vault_path: str, clothes_dir:str):
     clothes_path = os.path.join(vault_path, clothes_dir)
 
     clothes = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(clothes_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(clothes_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             cloth_name = os.path.basename(filepath).replace('.md', '')
@@ -121,7 +121,7 @@ def load_modifiers(vault_path: str, modifiers_dir:str):
     modifiers_path = os.path.join(vault_path, modifiers_dir)
 
     modifiers = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(modifiers_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(modifiers_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             modifier_name = os.path.basename(filepath).replace('.md', '')
@@ -148,7 +148,7 @@ def load_stages(vault_path: str, stage_dir:str):
     stages_path = os.path.join(vault_path, stage_dir)
 
     stages = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(stages_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(stages_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             stage_name = os.path.basename(filepath).replace('.md', '')
@@ -175,7 +175,7 @@ def load_styles(vault_path: str, style_dir:str):
     style_path = os.path.join(vault_path, style_dir)
 
     styles = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(style_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(style_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             style_name = os.path.basename(filepath).replace('.md', '')
