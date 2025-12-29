@@ -251,6 +251,10 @@ def main():
     fitted_modifiers = modifiers.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
     selected_template_name = st.sidebar.selectbox("Select Template", options=list(templates.keys()))
 
+    if not selected_template_name:
+        st.error("Template not found. Please check your template directory.")
+        st.stop()
+
     temlpate = env.from_string(templates[selected_template_name])
 
     fitted_clothes = clothes.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
