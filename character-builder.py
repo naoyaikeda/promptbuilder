@@ -94,7 +94,7 @@ def load_clothes(vault_path: str, clothes_dir:str):
     clothes_path = os.path.join(vault_path, clothes_dir)
 
     clothes = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(clothes_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(clothes_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             cloth_name = os.path.basename(filepath).replace('.md', '')
@@ -121,7 +121,7 @@ def load_modifiers(vault_path: str, modifiers_dir:str):
     modifiers_path = os.path.join(vault_path, modifiers_dir)
 
     modifiers = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(modifiers_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(modifiers_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             modifier_name = os.path.basename(filepath).replace('.md', '')
@@ -148,7 +148,7 @@ def load_stages(vault_path: str, stage_dir:str):
     stages_path = os.path.join(vault_path, stage_dir)
 
     stages = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(stages_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(stages_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             stage_name = os.path.basename(filepath).replace('.md', '')
@@ -175,7 +175,7 @@ def load_styles(vault_path: str, style_dir:str):
     style_path = os.path.join(vault_path, style_dir)
 
     styles = [{'name': 'empty', 'tags': [], 'base_model': 'common', 'positive': '', 'lora': ''}]
-    for filepath in glob.glob(os.path.join(style_path, "*.md"), recursive=True):
+    for filepath in glob.glob(os.path.join(style_path, "**/*.md"), recursive=True):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
             style_name = os.path.basename(filepath).replace('.md', '')
@@ -257,6 +257,9 @@ def main():
     fitted_stages = stages.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
     fitted_styles = styles.filter(pl.col('base_model').is_in([base_model.lower(),'common']))
 
+    if "stage_tags" not in st.session_state:
+        st.session_state.stage_tags = []
+
     if "clothes_count" not in st.session_state:
         st.session_state.clothes_count = 1
     
@@ -323,6 +326,17 @@ def main():
             "positive": selected_modifier_data.get("positive", ""),
         })
 
+    stage_tags_list = fitted_stages.select("tags").explode("tags").unique().drop_nulls().sort("tags")["tags"].to_list()
+    selected_stage_tags = st.multiselect("ステージタグ絞り込み", options=stage_tags_list, key="stage_tags")
+
+    if selected_stage_tags:
+        filtered_stages = fitted_stages.filter(
+            (pl.col("name") == "empty") |
+            (pl.col("tags").list.set_intersection(selected_stage_tags).list.len() > 0)
+        )
+    else:
+        filtered_stages = fitted_stages
+
     scol1, scol2 = st.columns(2)
     with scol1:
         if st.button("追加", key="btn_add_stages"):
@@ -335,7 +349,7 @@ def main():
     for i in range(st.session_state.stages_count):
         val = st.selectbox(
             f"ステージ項目 {i+1}",
-            options=fitted_stages['name'].to_list(),
+            options=filtered_stages['name'].to_list(),
             key=f"sb_stages_{i}" # keyをより具体的に
         )
         selected_stages_values.append(val)
