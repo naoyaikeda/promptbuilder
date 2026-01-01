@@ -16,6 +16,9 @@
 {% if mod.lora %}
 <lora:{{ mod.lora }}>, 
 {% endif %}
+{% if mod.embedding %}
+(embedding:{{ mod.embedding }}:1.0),
+{% endif %}
 {% if mod.positive %}
 {{ mod.positive }},
 {% endif %}

@@ -138,6 +138,7 @@ def load_modifiers(vault_path: str, modifiers_dir:str):
 
             modifier['positive'] = post.metadata.get('Base', '')
             modifier['lora'] = post.metadata.get('LoRA', '')
+            modifier['embedding'] = post.metadata.get('Embedding', '')
             modifiers.append(modifier)
     
     df_modifiers = pl.DataFrame(modifiers)
@@ -322,6 +323,7 @@ def main():
         mods.append({
             "lora": selected_modifier_data.get("lora", ""),
             "positive": selected_modifier_data.get("positive", ""),
+            "embedding": selected_modifier_data.get("embedding", ""),
         })
 
     scol1, scol2 = st.columns(2)
