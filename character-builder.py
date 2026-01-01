@@ -165,6 +165,7 @@ def load_stages(vault_path: str, stage_dir:str):
 
             stage['positive'] = post.metadata.get('Base', '')
             stage['lora'] = post.metadata.get('LoRA', '')
+            stage['embedding'] = post.metadata.get('Embedding', '')
             stages.append(stage)
     
     df_stages = pl.DataFrame(stages)
@@ -348,6 +349,7 @@ def main():
         stg.append({
             "lora": selected_stage_data.get("lora", ""),
             "positive": selected_stage_data.get("positive", ""),
+            "embedding": selected_stage_data.get("embedding", ""),
         })
 
     ycol1, ycol2 = st.columns(2)

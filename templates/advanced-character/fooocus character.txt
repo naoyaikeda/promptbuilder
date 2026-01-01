@@ -27,6 +27,9 @@
 {% if stage.positive %}
 {{ stage.positive }},
 {% endif %}
+{% if stage.embedding %}
+(embedding:{{ stage.embedding }}:1.0),
+{% endif %}
 {% endfor %}
 {% for style in styles %}
 {% if style.lora %}
