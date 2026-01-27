@@ -1,0 +1,412 @@
+{
+  "19": {
+    "inputs": {
+      "ckpt_name": "waiIllustriousSDXL_v160.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "チェックポイントを読み込む"
+    }
+  },
+  "21": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1,
+      "lora_stack": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "24": {
+    "inputs": {
+      "text": "lowres, cartoon, graphic, text, painting, crayon, graphite, abstract, glitch, deformed, mutated, ugly, disfigured, longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, embedding:NEGATIVE_HANDS,(interlocked fingers, badly drawn hands and fingers, anatomically incorrect hands),(extra digit:1.1),head_out_of_frame,multiple girls,lowres,(bad quality,worst quality:1.2),bad anatomy,sketch,jpeg artifacts,poorly drawn,(censor),blurry,watermark, bad_anatomy, bad_hands, deformed anatomy, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, monochrome,very displeasing",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "25": {
+    "inputs": {
+      "width": 1152,
+      "height": 896,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空の潜在画像"
+    }
+  },
+  "29": {
+    "inputs": {
+      "filename": "%time_%basemodelname_%seed",
+      "path": "%date",
+      "extension": "png",
+      "steps": 20,
+      "cfg": 7,
+      "modelname": "",
+      "sampler_name": "",
+      "scheduler_name": "normal",
+      "positive": "unknown",
+      "negative": "unknown",
+      "seed_value": 0,
+      "width": 512,
+      "height": 512,
+      "lossless_webp": true,
+      "quality_jpeg_or_webp": 100,
+      "optimize_png": false,
+      "counter": 0,
+      "denoise": 1,
+      "clip_skip": 0,
+      "time_format": "%Y-%m-%d-%H%M%S",
+      "save_workflow_as_json": false,
+      "embed_workflow": true,
+      "additional_hashes": "",
+      "download_civitai_data": true,
+      "easy_remix": true,
+      "show_preview": true,
+      "custom": "",
+      "images": [
+        "59:51:47",
+        0
+      ]
+    },
+    "class_type": "Image Saver",
+    "_meta": {
+      "title": "Image Saver"
+    }
+  },
+  "30": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "キャラクター"
+    }
+  },
+  "31": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "服装"
+    }
+  },
+  "32": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "ステージ"
+    }
+  },
+  "37": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "その他"
+    }
+  },
+  "40": {
+    "inputs": {
+      "images": [
+        "59:51:47",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "画像プレビュー"
+    }
+  },
+  "45": {
+    "inputs": {
+      "model": [
+        "19",
+        0
+      ],
+      "clip": [
+        "19",
+        1
+      ],
+      "lora_stack": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "CR Apply LoRA Stack",
+    "_meta": {
+      "title": "💊 CR Apply LoRA Stack"
+    }
+  },
+  "57": {
+    "inputs": {
+      "text": "semi-photorealistic, cinematic lighting, masterpiece,best quality,amazing quality,ultra detailed, very aesthetic,absurdres,skinny,general,highres, ultra-detailed, amazing quality, newest, scenery,beautiful detailed hair, beautiful detailed eyes, beautiful detailed face, dynamic lighting, super detailed skin,sharp focus,rating_explicit",
+      "clip": [
+        "45",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "画質等"
+    }
+  },
+  "60": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "61": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "62": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "63": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1,
+      "lora_stack": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "64": {
+    "inputs": {
+      "switch_1": "Off",
+      "lora_name_1": "None",
+      "model_weight_1": 1,
+      "clip_weight_1": 1,
+      "switch_2": "Off",
+      "lora_name_2": "None",
+      "model_weight_2": 1,
+      "clip_weight_2": 1,
+      "switch_3": "Off",
+      "lora_name_3": "None",
+      "model_weight_3": 1,
+      "clip_weight_3": 1
+    },
+    "class_type": "CR LoRA Stack",
+    "_meta": {
+      "title": "💊 CR LoRA Stack"
+    }
+  },
+  "59:51:46": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": 706972626548877,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "end_at_step": 10000,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "45",
+        0
+      ],
+      "positive": [
+        "59:58:53",
+        0
+      ],
+      "negative": [
+        "24",
+        0
+      ],
+      "latent_image": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "Kサンプラー（高度）"
+    }
+  },
+  "59:51:47": {
+    "inputs": {
+      "samples": [
+        "59:51:46",
+        0
+      ],
+      "vae": [
+        "19",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEデコード"
+    }
+  },
+  "59:58:53": {
+    "inputs": {
+      "conditioning_to": [
+        "59:58:54",
+        0
+      ],
+      "conditioning_from": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "ConditioningConcat",
+    "_meta": {
+      "title": "条件付け（連結）"
+    }
+  },
+  "59:58:54": {
+    "inputs": {
+      "conditioning_to": [
+        "59:58:56",
+        0
+      ],
+      "conditioning_from": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "ConditioningConcat",
+    "_meta": {
+      "title": "条件付け（連結）"
+    }
+  },
+  "59:58:56": {
+    "inputs": {
+      "conditioning_to": [
+        "57",
+        0
+      ],
+      "conditioning_from": [
+        "32",
+        0
+      ]
+    },
+    "class_type": "ConditioningConcat",
+    "_meta": {
+      "title": "条件付け（連結）"
+    }
+  },
+  "59:58:55": {
+    "inputs": {
+      "conditioning_to": [
+        "59:58:53",
+        0
+      ],
+      "conditioning_from": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "ConditioningConcat",
+    "_meta": {
+      "title": "条件付け（連結）"
+    }
+  }
+}
